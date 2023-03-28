@@ -30,7 +30,7 @@ class _ApplyableBase:
             if isinstance(self.value, Iterable):
                 return type(self)([*map(func, self.value)])
             else:
-                return type(self)(*map(func, [self.value]))
+                return type(self)(func(self.value))
 
         except Exception as e:
             return self.handle_bad_variant(e)

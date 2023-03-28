@@ -22,4 +22,3 @@ match test2.variant:
         print(f"It's fine: {test2.unwrap()}")
     case "Error":
         print(f"It errored out: {test2.unwrap()}")
-
