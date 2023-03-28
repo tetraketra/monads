@@ -6,7 +6,7 @@ def add(a, b):
     return a + b
 
 test = Error(2)
-test = test.map(lambda x: add(x, 1))
+test = test.apply(lambda x: add(x, 1))
 
 match test.variant:
     case "Ok":
@@ -15,7 +15,7 @@ match test.variant:
         print(f"It errored out: {test.unwrap()}")
 
 test2 = Error(2)
-test2 = test2.map(lambda x: add(x, -1))
+test2 = test2.apply(lambda x: add(x, -1))
 
 match test2.variant:
     case "Ok":

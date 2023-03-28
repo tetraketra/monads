@@ -19,12 +19,13 @@ class Monad:
         return type(self.value)
 
 
-@dataclass
 class _ActualOrElseBase:
     def handle_bad_variant(self, not_ok) -> _ActualOrElseBase:
         pass
-    
-    def map(self, func) -> _ActualOrElseBase:
+
+
+class _ApplyableBase:
+    def apply(self, func) -> _ActualOrElseBase:
         try:
             if isinstance(self.value, Iterable):
                 return type(self)([*map(func, self.value)])
@@ -38,7 +39,7 @@ class _ActualOrElseBase:
 
 # The Actual Monads # ---------------------------------------------------------
 @dataclass
-class Maybe(Monad, _ActualOrElseBase):
+class Maybe(Monad, _ActualOrElseBase, _ApplyableBase):
     variant: Literal["Ok", "Empty"] = field(init = False, repr = True)
 
     def __post_init__(self) -> None:
@@ -52,7 +53,7 @@ class Maybe(Monad, _ActualOrElseBase):
 
 
 @dataclass
-class Error(Monad, _ActualOrElseBase):
+class Error(Monad, _ActualOrElseBase, _ApplyableBase):
     variant: Literal["Ok", "Error"] = field(init = False, repr = True)
 
     def __post_init__(self) -> None:
