@@ -1,8 +1,13 @@
+# Imports # -------------------------------------------------------------------
 from __future__ import annotations
-from collections.abc import Iterable
+
 from dataclasses import dataclass, field
+from collections.abc import Iterable
 from typing import Any, Literal
 
+
+
+# Base Classes # --------------------------------------------------------------
 @dataclass
 class Monad:
     value: Any
@@ -15,40 +20,46 @@ class Monad:
 
 
 @dataclass
-class ActualOrElse:
-    def map(self, func) -> Maybe:
+class _ActualOrElseBase:
+    def handle_bad_variant(self, not_ok) -> _ActualOrElseBase:
+        pass
+    
+    def map(self, func) -> _ActualOrElseBase:
         try:
             if isinstance(self.value, Iterable):
-                return Maybe([*map(func, self.value)])
+                return type(self)([*map(func, self.value)])
             else:
-                return Maybe(*map(func, [self.value]))
+                return type(self)(*map(func, [self.value]))
 
         except Exception as e:
-            match self:
-                case Maybe():
-                    return Maybe(None)
-                case Error():
-                    return Error(e)
-                case _:
-                    raise NotImplementedError
+            return self.handle_bad_variant(e)
 
 
+
+# The Actual Monads # ---------------------------------------------------------
 @dataclass
-class Maybe(Monad, ActualOrElse):
+class Maybe(Monad, _ActualOrElseBase):
     variant: Literal["Ok", "Empty"] = field(init = False, repr = True)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.value is None:
             self.variant = "Empty"
         else:
             self.variant = "Ok"
 
+    def handle_bad_variant(self, _) -> Maybe:
+        return Maybe(None)
+
+
 @dataclass
-class Error(Monad, ActualOrElse):
+class Error(Monad, _ActualOrElseBase):
     variant: Literal["Ok", "Error"] = field(init = False, repr = True)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if isinstance(self.value, Exception):
             self.variant = "Error"
         else:
             self.variant = "Ok"
+
+    def handle_bad_variant(self, exception) -> Error:
+        return Error(exception)
