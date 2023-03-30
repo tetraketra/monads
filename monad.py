@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from collections.abc import Iterable
 from typing import Any, Literal
+from abc import ABC, abstractmethod
 
 
 
@@ -15,11 +16,13 @@ class Monad:
     def unwrap(self) -> Any:
         return self.value
 
+
     def type(self) -> Any:
         return type(self.value)
 
 
-class _ActualOrElseBase:
+class _ActualOrElseBase(ABC):
+    @abstractmethod
     def handle_bad_variant(self, not_ok) -> _ActualOrElseBase:
         pass
 
